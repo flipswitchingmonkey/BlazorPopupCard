@@ -1,0 +1,104 @@
+﻿@inject IJSRuntime jsRuntime
+
+@if (Visible)
+{
+    <div style="width:100%;height:100%;position:absolute;left:0;top:0;" id="modalBackground" @onclick="Close">
+        <div @onclick:stopPropagation="true"
+             style=@($"opacity:{Opacity}; position:absolute; left:{HorizontalOffset}px; top:{VerticalOffset}px;transition: opacity .25s ease-in-out;-moz-transition: opacity .25s ease-in-out;-webkit-transition: opacity .25s ease-in-out;z-index:1000;")>
+            <div class="card rounded" style=@($"width:{Width};height:{Height}")>
+                <div class="card-body">
+                    <h5 class="card-title">@Title</h5>
+                    <p class="card-text">
+                        @ChildContent
+                    </p>
+                    @if (ButtonBar)
+                    {
+                        <div class="row">
+                            <div class="col-md-6" style="text-align:center;">
+                                <button type="button" class="btn btn-primary btn-sm" @onclick="Click">@PrimaryButtonText</button>
+                            </div>
+                            <div class="col-md-6" style="text-align:center;">
+                                <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal" @onclick="Close">@SecondaryButtonText</button>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+
+    [Parameter] public RenderFragment ChildContent { get; set; }
+
+    [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
+    [Parameter] public EventCallback<MouseEventArgs> OnClose { get; set; }
+
+    [Parameter] public string Title { get; set; } = "Modal Title";
+    [Parameter] public string Id { get; set; } = "exampleModal";
+    [Parameter] public string PrimaryButtonText { get; set; } = "Save changes";
+    [Parameter] public string SecondaryButtonText { get; set; } = "Close";
+    [Parameter] public bool HideOnClick { get; set; } = true;
+    [Parameter] public int FadeMs { get; set; } = 0;
+    [Parameter] public string Width { get; set; } = "400px";
+    [Parameter] public string Height { get; set; } = "300px";
+    [Parameter] public bool ButtonBar { get; set; } = true;
+
+    [Parameter] public int HorizontalOffset { get; set; }
+    [Parameter] public int VerticalOffset { get; set; }
+
+    private bool Visible { get; set; }
+    private double Opacity { get; set; } = 0.0;
+    protected string modalClass = "modal show";
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+    }
+
+    public async Task Toggle()
+    {
+        if (Visible) Hide();
+        else await Show();
+    }
+
+    public async Task Close(MouseEventArgs args = null)
+    {
+        if (FadeMs > 0)
+        {
+            Opacity = 0;
+            await Task.Delay(FadeMs);
+        }
+        Visible = false;
+        await OnClose.InvokeAsync(args);
+    }
+
+    public async Task Click(MouseEventArgs args = null)
+    {
+        await OnClick.InvokeAsync(args);
+        if (HideOnClick) Hide();
+    }
+
+    public async Task Show(MouseEventArgs args = null)
+    {
+        if (args != null)
+        {
+            HorizontalOffset = (int)(args.ClientX);
+            VerticalOffset = (int)(args.ClientY);
+        }
+        Visible = true;
+        if (FadeMs > 0)
+        {
+            // a delay to wait for the html to render on page, otherwise the CSS transition does not trigger
+            await Task.Delay(100);
+        }
+        Opacity = 1.0;
+    }
+
+    public void Hide()
+    {
+        Visible = false;
+    }
+
+}

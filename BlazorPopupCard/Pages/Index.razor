@@ -1,0 +1,27 @@
+﻿@page "/"
+
+<h1>Popup Test</h1>
+
+<button @onclick="(args)=>ButtonClicked(args)">Click Me</button>
+
+<PopupCard @ref="card" Title="Test Card" FadeMs="500" Width="350px" Height="auto">
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris sit amet orci odio. 
+    
+    Praesent malesuada velit in sapien bibendum commodo. Morbi iaculis, est sed imperdiet mollis, sapien elit pulvinar lacus,
+    at lacinia dui nisi efficitur quam. Phasellus aliquam nisi at nibh posuere rhoncus. 
+    Vestibulum facilisis consectetur libero sit amet luctus. Donec lacinia sed lorem ut suscipit. 
+    
+    Nam ut arcu eu arcu tincidunt scelerisque ac non ligula. Etiam dapibus nisi eget turpis egestas sollicitudin. 
+    Nulla condimentum nunc eget lacus accumsan molestie.
+</PopupCard>
+
+@code  {
+
+    PopupCard card;
+
+    public async Task ButtonClicked(MouseEventArgs args)
+    {
+        await card.Show(args);
+    }
+
+}
